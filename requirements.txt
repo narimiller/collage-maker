@@ -1,0 +1,2 @@
+streamlit>=1.36.0
+pillow_heif>=0.16.0

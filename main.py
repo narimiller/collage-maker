@@ -1,37 +1,36 @@
 import streamlit as st
 from PIL import Image, ImageOps, ImageFile
-import pillow_heif  # Import pillow_heif for HEIC support
+import pillow_heif
 import io
 import math
 
-# Allow PIL to load large images without decompression error
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-MAX_IMAGE_PIXELS = 178956970  # Pillow's safe default threshold
-pillow_heif.register_heif_opener()  # Enable HEIC support
+MAX_IMAGE_PIXELS = 178956970
+pillow_heif.register_heif_opener()
 
 st.title("Collage Maker")
 
-# Initialize session state variables
 if "uploaded_files" not in st.session_state:
     st.session_state.uploaded_files = None
 if "clear_files" not in st.session_state:
     st.session_state.clear_files = False
 
-# Collage grid settings
+# Collage layout settings
 COLLAGE_WIDTH = 1500
 GRID_COLUMNS = 3
 CELL_SIZE = COLLAGE_WIDTH // GRID_COLUMNS  # Square cells of 500x500 pixels each
+PADDING = 10  # Padding between images
+BORDER_SIZE = 20  
+PADDING_COLOR = (40, 40, 40)
 
 uploaded_files = st.file_uploader(
     "Upload up to 15 photos", type=["jpg", "jpeg", "png", "heic"], accept_multiple_files=True
 )
 
-# Update session state with new uploads
 if uploaded_files:
     st.session_state.uploaded_files = uploaded_files
     st.session_state.clear_files = False
 
-# Clear uploaded files on button press
 if st.button("Clear Selection"):
     st.session_state.uploaded_files = None
     st.session_state.clear_files = True
@@ -45,14 +44,17 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
         else:
             images = []
             num_rows = math.ceil(num_images / GRID_COLUMNS)
-            collage_height = num_rows * CELL_SIZE
+            collage_height = num_rows * CELL_SIZE + (num_rows - 1) * PADDING 
+
+            canvas_width = COLLAGE_WIDTH + 2 * BORDER_SIZE
+            canvas_height = collage_height + 2 * BORDER_SIZE
 
             for uploaded_file in st.session_state.uploaded_files:
                 try:
-                    # Open and resize each image to fit within a square cell
+                    # Open and resize each image
                     image = Image.open(uploaded_file)
-                    image.thumbnail((CELL_SIZE, CELL_SIZE), Image.Resampling.LANCZOS)
-                    square_image = ImageOps.pad(image, (CELL_SIZE, CELL_SIZE), color=(26, 26, 26))
+                    image.thumbnail((CELL_SIZE - PADDING, CELL_SIZE - PADDING), Image.Resampling.LANCZOS)
+                    square_image = ImageOps.pad(image, (CELL_SIZE - PADDING, CELL_SIZE - PADDING), color=(40,40,40))
                     images.append(square_image)
                 except Exception as e:
                     st.error(f"Could not process image {uploaded_file.name}: {e}")
@@ -62,18 +64,31 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
                 st.warning("No valid images to create a collage.")
                 st.stop()
 
-            # Create canvas and arrange images in grid
-            collage = Image.new("RGB", (COLLAGE_WIDTH, collage_height), color="white")
+            # Create a black canvas for the border
+            collage_with_border = Image.new("RGB", (canvas_width, canvas_height), color=(12,12,12))
+
+            # Create canvas for collage
+            collage = Image.new("RGB", (COLLAGE_WIDTH, collage_height), (40,40,40))
+
             for idx, image in enumerate(images):
-                x_offset = (idx % GRID_COLUMNS) * CELL_SIZE
-                y_offset = (idx // GRID_COLUMNS) * CELL_SIZE
-                collage.paste(image, (x_offset, y_offset))
+                row = idx // GRID_COLUMNS
+                col = idx % GRID_COLUMNS
+                x_offset = col * (CELL_SIZE + PADDING)
+                y_offset = row * (CELL_SIZE + PADDING)
 
-            st.image(collage, caption="Your Photo Collage", use_column_width=True)
+                collage.paste(PADDING_COLOR, (x_offset, y_offset, x_offset + CELL_SIZE + PADDING, y_offset + CELL_SIZE + PADDING))
 
-            # Provide download option for the collage
+                collage.paste(image, (x_offset + PADDING // 2, y_offset + PADDING // 2))
+
+            # Paste collage onto black canvas
+            collage_with_border.paste(collage, (BORDER_SIZE, BORDER_SIZE))
+
+            # Display collage with border
+            st.image(collage_with_border, caption="Your Photo Collage", use_column_width=True)
+
+            # Download button
             buffer = io.BytesIO()
-            collage.save(buffer, format="PNG")
+            collage_with_border.save(buffer, format="PNG")
             buffer.seek(0)
             st.download_button(
                 label="Download Collage",
@@ -83,5 +98,3 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
             )
 else:
     st.info("Please upload photos to create a collage.")
-
-

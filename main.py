@@ -20,11 +20,12 @@ if "clear_files" not in st.session_state:
     st.session_state.clear_files = False
 
 # Collage layout settings
-COLLAGE_WIDTH = 1500
+SCALE_FACTOR = (2000/1500)
+COLLAGE_WIDTH = int(1500 * SCALE_FACTOR)
 GRID_COLUMNS = 3
-CELL_SIZE = COLLAGE_WIDTH // GRID_COLUMNS  # Square cells of 500x500 pixels each
-PADDING = 10  # Padding between images
-BORDER_SIZE = 20  
+CELL_SIZE = int(COLLAGE_WIDTH // GRID_COLUMNS)  # Square cells
+PADDING = int(10 * SCALE_FACTOR)  # Padding between images
+BORDER_SIZE = int(20 * SCALE_FACTOR)  
 PADDING_COLOR = (40, 40, 40)
 
 uploaded_files = st.file_uploader(
@@ -42,7 +43,7 @@ if st.button("Clear Selection"):
 st.markdown("<br>", unsafe_allow_html=True)
 
 if st.session_state.uploaded_files and not st.session_state.clear_files:
-    # Custom filename input
+
     custom_filename = st.text_input("Enter a filename for your collage (without extension)", "collage")
 
     if st.button("Create Collage"):
@@ -73,7 +74,6 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
                 st.warning("No valid images to create a collage.")
                 st.stop()
 
-            # Create a black canvas for the border
             collage_with_border = Image.new("RGB", (canvas_width, canvas_height), color=(40,40,40))
 
             # Create canvas for collage
@@ -89,7 +89,7 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
 
                 collage.paste(image, (x_offset + PADDING // 2, y_offset + PADDING // 2))
 
-            # Paste collage onto black canvas
+            # Paste collage onto canvas
             collage_with_border.paste(collage, (BORDER_SIZE, BORDER_SIZE))
 
             # Display collage with border
@@ -97,13 +97,13 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
 
             # Download button
             buffer = io.BytesIO()
-            collage_with_border.save(buffer, format="PNG")
+            collage_with_border.save(buffer, format="JPEG", quality=85)
             buffer.seek(0)
             st.download_button(
                 label="Download Collage",
                 data=buffer,
-                file_name=f"{custom_filename}.png",
-                mime="image/png"
+                file_name=f"{custom_filename}.jpg",
+                mime="image/jpeg"
             )
 else:
     st.info("Please upload photos to create a collage.")

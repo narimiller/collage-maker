@@ -8,8 +8,9 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 MAX_IMAGE_PIXELS = 178956970
 pillow_heif.register_heif_opener()
 
-st.title("Collage Maker")
-st.write("Congratulations on completing Inktober at the Movies! Create collages of your awesome work by following the instructions below.")
+st.title("Inktober 2024 Collage Maker")
+st.write("""Congratulations on completing Inktober at the Movies! This tool will arrange your images into an n-by-3 collage, where the number of rows depends on the number of images. 
+         You may upload up to 15 images at a time. Generate as many collages as you need to showcase all your submissions.""")
 
 st.markdown("<br>", unsafe_allow_html=True)
 

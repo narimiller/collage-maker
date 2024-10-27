@@ -74,7 +74,7 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
                 st.stop()
 
             # Create a black canvas for the border
-            collage_with_border = Image.new("RGB", (canvas_width, canvas_height), color=(12,12,12))
+            collage_with_border = Image.new("RGB", (canvas_width, canvas_height), color=(40,40,40))
 
             # Create canvas for collage
             collage = Image.new("RGB", (COLLAGE_WIDTH, collage_height), (40,40,40))

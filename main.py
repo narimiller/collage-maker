@@ -9,6 +9,9 @@ MAX_IMAGE_PIXELS = 178956970
 pillow_heif.register_heif_opener()
 
 st.title("Collage Maker")
+st.write("Congratulations on completing Inktober at the Movies! Create collages of your awesome work by following the instructions below.")
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 if "uploaded_files" not in st.session_state:
     st.session_state.uploaded_files = None
@@ -35,7 +38,12 @@ if st.button("Clear Selection"):
     st.session_state.uploaded_files = None
     st.session_state.clear_files = True
 
+st.markdown("<br>", unsafe_allow_html=True)
+
 if st.session_state.uploaded_files and not st.session_state.clear_files:
+    # Custom filename input
+    custom_filename = st.text_input("Enter a filename for your collage (without extension)", "collage")
+
     if st.button("Create Collage"):
         num_images = len(st.session_state.uploaded_files)
         
@@ -84,7 +92,7 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
             collage_with_border.paste(collage, (BORDER_SIZE, BORDER_SIZE))
 
             # Display collage with border
-            st.image(collage_with_border, caption="Your Photo Collage", use_column_width=True)
+            st.image(collage_with_border, caption=f"{custom_filename}", use_column_width=True)
 
             # Download button
             buffer = io.BytesIO()
@@ -93,7 +101,7 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
             st.download_button(
                 label="Download Collage",
                 data=buffer,
-                file_name="collage.png",
+                file_name=f"{custom_filename}.png",
                 mime="image/png"
             )
 else:

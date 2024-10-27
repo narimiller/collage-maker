@@ -89,13 +89,10 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
 
                 collage.paste(image, (x_offset + PADDING // 2, y_offset + PADDING // 2))
 
-            # Paste collage onto canvas
             collage_with_border.paste(collage, (BORDER_SIZE, BORDER_SIZE))
 
-            # Display collage with border
             st.image(collage_with_border, caption=f"{custom_filename}", use_column_width=True)
 
-            # Download button
             buffer = io.BytesIO()
             collage_with_border.save(buffer, format="JPEG", quality=85)
             buffer.seek(0)

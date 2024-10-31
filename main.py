@@ -1,8 +1,27 @@
 import streamlit as st
 from PIL import Image, ImageOps, ImageFile
+from PIL.ExifTags import TAGS
 import pillow_heif
 import io
 import math
+
+def apply_exif_rotation(image):
+    try:
+        if hasattr(image, "_getexif"):
+            exif = image._getexif()
+            if exif is not None:
+                for tag, value in exif.items():
+                    if TAGS.get(tag) == 'Orientation':
+                        if value == 3:
+                            return image.rotate(180, expand=True)
+                        elif value == 6:
+                            return image.rotate(270, expand=True)
+                        elif value == 8:
+                            return image.rotate(90, expand=True)
+        return image
+    except Exception as e:
+        st.error(f"Error applying EXIF rotation: {e}")
+        return image
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 MAX_IMAGE_PIXELS = 178956970
@@ -62,9 +81,7 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
             for uploaded_file in st.session_state.uploaded_files:
                 try:
                     image = Image.open(uploaded_file)
-                    
-                    if hasattr(image, "_getexif"):
-                        image = ImageOps.exif_transpose(image) or image
+                    image = apply_exif_rotation(image)
                     
                     if uploaded_file.type == "image/tiff":
                         buffer = io.BytesIO()

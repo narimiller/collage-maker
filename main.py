@@ -37,7 +37,7 @@ if uploaded_files:
     st.session_state.clear_files = False
 
 if st.button("Clear Selection"):
-    st.session_state.uploaded_files = None
+    st.session_state.uploaded_files = []
     st.session_state.clear_files = True
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -62,6 +62,9 @@ if st.session_state.uploaded_files and not st.session_state.clear_files:
             for uploaded_file in st.session_state.uploaded_files:
                 try:
                     image = Image.open(uploaded_file)
+                    
+                    if hasattr(image, "_getexif"):
+                        image = ImageOps.exif_transpose(image) or image
                     
                     if uploaded_file.type == "image/tiff":
                         buffer = io.BytesIO()

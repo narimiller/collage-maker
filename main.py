@@ -12,12 +12,27 @@ def apply_exif_rotation(image):
             if exif is not None:
                 for tag, value in exif.items():
                     if TAGS.get(tag) == 'Orientation':
-                        if value == 3:
+                        # Apply the transformations based on EXIF orientation
+                        if value == 2:
+                            return image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+                        elif value == 3:
+                            return image.transpose(Image.Transpose.ROTATE_180)
+                        elif value == 4:
+                            return image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+                        elif value == 5:
+                            return image.transpose(Image.Transpose.ROTATE_270).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+                        elif value == 6:
+                            return image.transpose(Image.Transpose.ROTATE_270)
+                        elif value == 7:
+                            return image.transpose(Image.Transpose.ROTATE_90).transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+                        elif value == 8:
+                            return image.transpose(Image.Transpose.ROTATE_90)
+                        elif value == 3:
                             return image.rotate(180, expand=True)
                         elif value == 6:
                             return image.rotate(270, expand=True)
                         elif value == 8:
-                            return image.rotate(90, expand=True)
+                            return image.rotate(90, expand=True)                       
         return image
     except Exception as e:
         st.error(f"Error applying EXIF rotation: {e}")
@@ -27,8 +42,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 MAX_IMAGE_PIXELS = 178956970
 pillow_heif.register_heif_opener()
 
-st.title("Inktober 2024 Collage Maker")
-st.write("""Congratulations on completing Inktober at the Movies! This tool will arrange your images into an n-by-3 collage, where the number of rows depends on the number of images. 
+st.title("Collage Maker")
+st.write("""This tool will arrange your images into an n-by-3 collage, where the number of rows depends on the number of images. 
          You may upload up to 15 images at a time. Generate as many collages as you need to showcase all your submissions.""")
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -55,9 +70,11 @@ if uploaded_files:
     st.session_state.uploaded_files = uploaded_files
     st.session_state.clear_files = False
 
-if st.button("Clear Selection"):
-    st.session_state.uploaded_files = []
-    st.session_state.clear_files = True
+#if st.button("Clear Selection"):
+#    st.session_state.uploaded_files = []
+#    st.session_state.clear_files = True
+
+st.write("*To clear your selection, please refresh the page.*")
 
 st.markdown("<br>", unsafe_allow_html=True)
 

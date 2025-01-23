@@ -5,6 +5,8 @@ import pillow_heif
 import io
 import math
 
+st.set_option("client.showErrorDetails", False)
+
 def apply_exif_rotation(image):
     try:
         if hasattr(image, "_getexif"):
